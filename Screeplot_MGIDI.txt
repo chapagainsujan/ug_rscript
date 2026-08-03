@@ -1,0 +1,224 @@
+# ── Load Libraries ─────────────────────────────────────────────
+library(dplyr)
+library(ggplot2)
+library(readxl)
+library(showtext)
+library(FactoMineR)
+library(factoextra)
+
+# ── Font Setup ────────────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── Load Dataset ──────────────────────────────────────────────
+# Replace SAAAAA with your actual dataset name
+SD <- SAAAAA  
+
+# Keep only numeric columns
+SD_num <- SD %>% select(where(is.numeric))
+
+# ── Perform PCA ───────────────────────────────────────────────
+res.pca <- PCA(SD_num, graph = FALSE, scale.unit = TRUE)
+
+# ── Extract Eigenvalues & Explained Variance ──────────────────
+eig <- res.pca$eig
+eig_df <- data.frame(
+  PC = 1:10,
+  Eigenvalue = eig[1:10, 1],
+  ExplainedVariation = eig[1:10, 2]  # Percentage of variance
+)
+
+# Create dummy point for PC0 (gap)
+gap_df <- data.frame(PC = 0, Eigenvalue = 0, ExplainedVariation = 0)
+plot_df <- rbind(gap_df, eig_df)
+
+# ── Plot Parameters ───────────────────────────────────────────
+base_size <- 50
+
+# Y-axis for eigenvalues (left axis - dynamic based on data)
+eigen_max <- max(plot_df$Eigenvalue[-1]) * 1.05  # 5% padding
+eigen_breaks <- pretty(c(0, eigen_max), n = 5)
+
+# Y-axis for percentages (right axis - fixed 0-35)
+percent_max <- 35
+percent_breaks <- seq(0, 35, by = 5)
+
+# Calculate scaling factor between axes
+scale_factor <- max(plot_df$ExplainedVariation[-1]) / eigen_max
+
+# ── Scree Plot ────────────────────────────────────────────────
+scree_plot <- ggplot(plot_df, aes(x = PC)) +
+  # Line and points for eigenvalues (PC1-PC10 only)
+  geom_line(aes(y = Eigenvalue), data = plot_df[-1,], 
+            color = "blue", linewidth = 0.6) +
+  geom_point(aes(y = Eigenvalue), data = plot_df[-1,], 
+             color = "blue", shape = 1, size = 2) +
+  
+  scale_x_continuous(
+    breaks = 0:10,
+    labels = c("", 1:10),
+    name = "Principal Components",
+    expand = expansion(mult = c(0, 0)),
+    limits = c(0, 10)
+  ) +
+  
+  # Left axis (Eigenvalues - dynamic)
+  scale_y_continuous(
+    name = "Eigenvalue",
+    breaks = eigen_breaks,
+    limits = c(0, eigen_max),
+    expand = expansion(mult = c(0, 0.05)),
+    
+    # Right axis (Percentage - fixed 0-35)
+    sec.axis = sec_axis(
+      trans = ~ . * scale_factor,
+      breaks = percent_breaks,
+      labels = percent_breaks,
+      name = "Percentage (%)"
+    )
+  ) +
+  
+  theme(
+    panel.background = element_rect(fill = "white", color = "black", size = 0.2),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black", size = 0.3),
+    axis.ticks = element_line(color = "black", size = 0.3),
+    axis.ticks.length = unit(5, "pt"),
+    
+    axis.title.x = element_text(size = base_size + 4, margin = margin(t = 10)),
+    axis.title.y = element_text(size = base_size + 4, margin = margin(r = 10)),
+    axis.title.y.right = element_text(size = base_size + 4, margin = margin(l = 10), angle = 90),
+    
+    axis.text.x = element_text(size = base_size, margin = margin(t = 5)),
+    axis.text.y = element_text(size = base_size, margin = margin(r = 5)),
+    axis.text.y.right = element_text(size = base_size, margin = margin(l = 5)),
+    
+    plot.margin = margin(10, 10, 15, 10),
+    text = element_text(family = "Times New Roman")
+  )
+
+# ── Save Plot ─────────────────────────────────────────────────
+ggsave("ScreePlot.tiff", 
+       plot = scree_plot, 
+       width = 5, 
+       height = 4.5, 
+       dpi = 600, 
+       bg = "white", 
+       device = "tiff")
+
+# ── Display Plot ──────────────────────────────────────────────
+print(scree_plot)
+
+
+# ── Load Libraries ─────────────────────────────────────────────
+library(dplyr)
+library(ggplot2)
+library(readxl)
+library(showtext)
+library(FactoMineR)
+library(factoextra)
+
+# ── Font Setup ────────────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── Load Dataset ──────────────────────────────────────────────
+# Replace SAAAAA with your actual dataset name
+SD <- manish
+
+# Keep only numeric columns
+SD_num <- SD %>% select(where(is.numeric))
+
+# ── Perform PCA ───────────────────────────────────────────────
+res.pca <- PCA(SD_num, graph = FALSE, scale.unit = TRUE)
+
+# ── Extract Eigenvalues & Explained Variance ──────────────────
+eig <- res.pca$eig
+eig_df <- data.frame(
+  PC = 1:10,
+  Eigenvalue = eig[1:10, 1],
+  ExplainedVariation = eig[1:10, 2]  # Percentage of variance
+)
+
+# Create dummy point for PC0 (gap)
+gap_df <- data.frame(PC = 0, Eigenvalue = 0, ExplainedVariation = 0)
+plot_df <- rbind(gap_df, eig_df)
+
+# ── Plot Parameters ───────────────────────────────────────────
+base_size <- 50
+
+# Y-axis for eigenvalues (left axis - dynamic based on data)
+eigen_max <- max(plot_df$Eigenvalue[-1]) * 1.05  # 5% padding
+eigen_breaks <- pretty(c(0, eigen_max), n = 5)
+
+# Y-axis for percentages (right axis - fixed 0-35)
+percent_max <- 35
+percent_breaks <- seq(0, 50, by = 5)
+
+# Calculate scaling factor between axes
+scale_factor <- max(plot_df$ExplainedVariation[-1]) / eigen_max
+
+# ── Scree Plot ────────────────────────────────────────────────
+scree_plot <- ggplot(plot_df, aes(x = PC)) +
+  # Line and points for eigenvalues (PC1-PC10 only)
+  geom_line(aes(y = Eigenvalue), data = plot_df[-1,], 
+            color = "blue", linewidth = 0.6) +
+  geom_point(aes(y = Eigenvalue), data = plot_df[-1,], 
+             color = "blue", shape = 1, size = 2) +
+  
+  scale_x_continuous(
+    breaks = 0:10,
+    labels = c("", 1:10),
+    name = "Principal Components",
+    expand = expansion(mult = c(0, 0)),
+    limits = c(0, 10)
+  ) +
+  
+  # Left axis (Eigenvalues - dynamic)
+  scale_y_continuous(
+    name = "Eigenvalue",
+    breaks = eigen_breaks,
+    limits = c(0, eigen_max),
+    expand = expansion(mult = c(0, 0.05)),
+    
+    # Right axis (Percentage - fixed 0-35)
+    sec.axis = sec_axis(
+      trans = ~ . * scale_factor,
+      breaks = percent_breaks,
+      labels = percent_breaks,
+      name = "Percentage (%)"
+    )
+  ) +
+  
+  theme(
+    panel.background = element_rect(fill = "white", color = "black", size = 0.2),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black", size = 0.3),
+    axis.ticks = element_line(color = "black", size = 0.3),
+    axis.ticks.length = unit(5, "pt"),
+    
+    axis.title.x = element_text(size = base_size + 4, margin = margin(t = 10)),
+    axis.title.y = element_text(size = base_size + 4, margin = margin(r = 10)),
+    axis.title.y.right = element_text(size = base_size + 4, margin = margin(l = 10), angle = 90),
+    
+    axis.text.x = element_text(size = base_size, margin = margin(t = 5)),
+    axis.text.y = element_text(size = base_size, margin = margin(r = 5)),
+    axis.text.y.right = element_text(size = base_size, margin = margin(l = 5)),
+    
+    plot.margin = margin(10, 10, 15, 10),
+    text = element_text(family = "Times New Roman")
+  )
+
+# ── Save Plot ─────────────────────────────────────────────────
+ggsave("ScreePlotmanish.tiff", 
+       plot = scree_plot, 
+       width = 5, 
+       height = 4.5, 
+       dpi = 600, 
+       bg = "white", 
+       device = "tiff")
+
+# ── Display Plot ──────────────────────────────────────────────
+print(scree_plot)

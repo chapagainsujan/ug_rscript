@@ -1,0 +1,75 @@
+# ── 1. Load Libraries ─────────────────────────────────────────────
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(showtext)
+
+# ── 2. Font Setup ────────────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── 3. Dataset ───────────────────────────────────────────────────
+SD <- leaf # Replace with your actual data 
+
+# Rename TRT levels: Irrigated → IR, Drought → D 
+SD$TRT <- recode(SD$TRT, "Irrigated" = "IR", "Drought" = "D")
+
+# ── 4. Plot Function ─────────────────────────────────────────────
+create_trait_plot <- function(data, trait, y_label) {
+  # Mean per treatment
+  mean_by_trt <- aggregate(data[[trait]], by = list(data$TRT), FUN = mean, na.rm = TRUE)
+  colnames(mean_by_trt) <- c("TRT", trait)
+  
+  # Mean per genotype per treatment
+  genotype_means <- data %>%
+    group_by(TRT, GEN) %>%
+    summarise(mean_trait = mean(.data[[trait]], na.rm = TRUE), .groups = "drop")
+  
+  ggplot(data, aes(x = TRT, y = .data[[trait]], color = TRT)) +
+    geom_boxplot(fill = "white", outlier.shape = NA, size = 1, aes(group = TRT)) +
+    geom_point(data = genotype_means,
+               aes(x = TRT, y = mean_trait, color = TRT),
+               shape = 16, size = 4, inherit.aes = FALSE) +
+    geom_point(data = mean_by_trt,
+               aes(x = TRT, y = .data[[trait]]),
+               shape = 18, color = "black", size = 4.5, inherit.aes = FALSE) +
+    scale_color_manual(values = c("D" = "#E69F00", "IR" = "#56B4E9")) +  # legend removed
+    labs(x = "", y = y_label) +
+    theme_gray(base_family = "Times New Roman") +
+    theme(
+      axis.title.x      = element_text(size = 108),
+      axis.title.y      = element_text(size = 108),
+      axis.text.x       = element_text(size = 108),
+      axis.text.y       = element_text(size = 108),
+      plot.title        = element_text(size = 108, face = "bold", hjust = 0.5),
+      legend.position   = "none",  # hide legend
+      plot.tag          = element_text(size = 124, face = "bold"),
+      panel.grid.major  = element_line(color = "gray80", size = 0.4),
+      panel.grid.minor  = element_line(color = "gray90", size = 0.2),
+      panel.border      = element_blank(),
+      axis.line.x       = element_blank(),
+      axis.line.y       = element_blank()
+    )
+}
+
+# ── 5. Create Plots ──────────────────────────────────────────────
+SPAD_plot   <- create_trait_plot(SD, "SPAD", "SPAD")
+FvFm_plot   <- create_trait_plot(SD, "FV/Fm", "FV/Fm")
+FvFo_plot   <- create_trait_plot(SD, "FV/Fo", "FV/Fo")
+GY_plot     <- create_trait_plot(SD, "GY", "GY (t/ha)")
+
+# ── 6. Combine in 1 Row × 4 Columns ─────────────────────────────
+Final_plot <- SPAD_plot + FvFm_plot + FvFo_plot + GY_plot +
+  plot_layout(nrow = 1, guides = "collect") +  # 1 row
+  plot_annotation(
+    tag_levels = 'a',
+    tag_prefix = '',
+    tag_suffix = '.'
+  )
+
+# ── 7. Display & Save ───────────────────────────────────────────
+print(Final_plot)
+
+ggsave("leaf_1row_nolegend.png",
+       plot   = Final_plot,
+       width  = 20, height = 6, dpi = 400)

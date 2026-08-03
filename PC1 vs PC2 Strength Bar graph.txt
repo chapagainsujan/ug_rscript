@@ -1,0 +1,128 @@
+# ── Load Libraries ─────────────────────────────────────────────
+library(dplyr)
+library(ggplot2)
+library(FactoMineR)
+library(patchwork)
+library(showtext)
+
+# ── Font Setup ────────────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── Customizable Parameters ──────────────────────────────────
+# Text Sizes
+axis_text_size <- 120
+title_text_size <- 140
+main_title_size <- 170
+
+# Text Labels
+pc1_title <- "PC1 vs Traits"
+pc2_title <- "PC2 vs Traits"
+main_title <- "Irrigated Environmnet"
+y_axis_label <- "PCA loadings"
+positive_label <- "Positive"
+negative_label <- "Negative"
+
+# Visual Parameters
+bar_width <- 0.5
+plot_width <- 40  # Increased width to accommodate large text
+plot_height <- 25 # Increased height
+positive_color <- "#1f77b4"
+negative_color <- "#ff7f0e"
+
+# ── Load and Prepare Dataset ──────────────────────────────────
+SD <- SAAAAA  
+SD_num <- SD %>% select(where(is.numeric))
+
+# ── Perform PCA ───────────────────────────────────────────────
+res.pca <- PCA(SD_num, graph = FALSE, scale.unit = TRUE)
+
+# ── Extract Variable Correlations ────────────────────────────
+var_cor <- as.data.frame(res.pca$var$cor)
+var_cor$Variables <- rownames(var_cor)
+
+# ── Prepare Plot Data ────────────────────────────────────────
+prepare_pc_data <- function(pc_num) {
+  data.frame(
+    Variable = var_cor$Variables,
+    Correlation = var_cor[[paste0("Dim.", pc_num)]],
+    PC = paste0("PC", pc_num),
+    Sign = ifelse(var_cor[[paste0("Dim.", pc_num)]] >= 0, positive_label, negative_label)
+  )
+}
+
+plot_data <- rbind(prepare_pc_data(1), prepare_pc_data(2))
+
+# ── Create Custom Plot Function ─────────────────────────────
+create_correlation_plot <- function(pc_num) {
+  pc_data <- plot_data %>% 
+    filter(PC == paste0("PC", pc_num)) %>%
+    arrange(Correlation)
+  
+  # Set fixed range from -0.8 to 0.8
+  y_breaks <- seq(-0.8, 0.8, by = 0.2)
+  y_limits <- c(-0.85, 0.85)  # Slightly wider than breaks
+  
+  ggplot(pc_data, aes(x = reorder(Variable, Correlation), 
+                      y = Correlation, 
+                      fill = Sign)) +
+    geom_bar(stat = "identity", width = bar_width) +
+    geom_hline(yintercept = 0, linetype = "solid", color = "black", linewidth = 0.5) +
+    coord_flip() +
+    labs(title = ifelse(pc_num == 1, pc1_title, pc2_title),
+         x = "", 
+         y = y_axis_label) +
+    scale_y_continuous(
+      limits = y_limits,
+      breaks = y_breaks,
+      labels = function(x) sprintf("%.1f", x)  # Format with one decimal
+    ) +
+    scale_fill_manual(values = c(positive_color, negative_color)) +
+    theme_minimal() +
+    theme(
+      text = element_text(family = "Times New Roman"),
+      plot.title = element_text(size = title_text_size, face = "bold", hjust = 0.5,
+                                margin = margin(b = 15)),
+      axis.title.x = element_text(size = axis_text_size, margin = margin(t = 10)),
+      axis.title.y = element_blank(),
+      axis.text.x = element_text(size = axis_text_size, color = "black"),
+      axis.text.y = element_text(size = axis_text_size, color = "black",
+                                 margin = margin(r = 5)),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.line.x = element_line(color = "black", linewidth = 0.5),
+      axis.ticks.x = element_line(color = "black", linewidth = 0.5),
+      plot.margin = margin(2, 2, 2, 2, "cm"),
+      legend.position = "none"
+    )
+}
+
+# ── Generate Plots ──────────────────────────────────────────
+pc1_plot <- create_correlation_plot(1)
+pc2_plot <- create_correlation_plot(2)
+
+# ── Combine Plots ──────────────────────────────────────────
+combined_plot <- pc1_plot + pc2_plot +
+  plot_layout(ncol = 2) +
+  plot_annotation(
+    title = main_title,
+    theme = theme(
+      plot.title = element_text(
+        family = "Times New Roman",
+        size = main_title_size,
+        face = "bold",
+        hjust = 0.5,
+        margin = margin(b = 20))
+    )
+  )
+
+# ── Save Output ────────────────────────────────────────────
+ggsave("PCA_Correlation_Combined.tiff", 
+       combined_plot, 
+       width = plot_width, 
+       height = plot_height, 
+       dpi = 300,
+       bg = "white")
+
+# ── Display Plot ──────────────────────────────────────────
+print(combined_plot)

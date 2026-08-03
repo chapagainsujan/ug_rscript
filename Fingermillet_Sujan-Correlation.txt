@@ -1,0 +1,80 @@
+# === Load Required Libraries ===
+library(GGally)
+library(ggplot2)
+library(dplyr)
+
+# === Load Data ===
+SD <- Millet  # Replace with your actual dataframe if different
+
+# === Prepare Data (select numeric columns only, exclude REP) ===
+trait_data <- SD %>%
+  select(where(is.numeric), -REP)
+
+# === List of trait names ===
+traits <- colnames(trait_data)
+
+# === Customize Variables ===
+custom_color <- "#00c4cd"  # Color for points and density
+highlight_color <- "#f6bcb7"  # Highlight color for significant correlation
+corr_text_size <- 5        # Correlation value text size (Adjustable)
+highlight_alpha <- 0.5     # Transparency for highlight color (Adjustable)
+# ===============================
+
+# === Custom Correlation Panel Function ===
+custom_cor <- function(data, mapping, size = corr_text_size, ...) {
+  x <- eval_data_col(data, mapping$x)
+  y <- eval_data_col(data, mapping$y)
+  
+  # Compute correlation and p-value
+  corr_test <- cor.test(x, y, use = "complete.obs")
+  r_val <- round(corr_test$estimate, 2)
+  p_val <- corr_test$p.value
+  
+  # Format significance stars
+  stars <- ifelse(p_val < 0.001, "***",
+                  ifelse(p_val < 0.01, "**",
+                         ifelse(p_val < 0.05, "*", "")))
+  
+  # Determine background color based on significance
+  bg_color <- ifelse(p_val < 0.05, highlight_color, "white")
+  
+  # Create label: r value + stars
+  label <- paste0(r_val, stars)
+  
+  # Plot with background rectangle and label
+  ggplot(data = data, mapping = mapping) +
+    annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, 
+             fill = bg_color, alpha = highlight_alpha) +
+    annotate("text", x = 0.5, y = 0.5, label = label, size = size, color = "black") +
+    theme_void()
+}
+
+# === Custom Function for Lower Panel Points ===
+custom_points <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_point(color = custom_color, size = 1.5, alpha = 0.6) +
+    theme_void()
+}
+
+# === Custom Function for Diagonal Density Plot ===
+custom_densityDiag <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_density(fill = custom_color, alpha = 0.5) +
+    theme_void()
+}
+
+# === Create ggpairs Plot ===
+cor_plot <- ggpairs(
+  data = trait_data,
+  columns = 1:ncol(trait_data),
+  upper = list(continuous = wrap(custom_cor)),
+  lower = list(continuous = wrap(custom_points)),
+  diag = list(continuous = wrap(custom_densityDiag)),
+  columnLabels = traits
+)
+
+# === Apply Theme to Strip Labels ===
+cor_plot <- cor_plot + theme(strip.text = element_text(size = 14, face = "bold"))
+
+# === Save High-Resolution Image ===
+ggsave("sujan.tiff", cor_plot, width = 14, height = 10, dpi = 400)
