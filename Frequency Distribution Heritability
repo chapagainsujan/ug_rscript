@@ -1,0 +1,512 @@
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+xlab("Plant Height (cm)") +
+ylab("Count")
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+text = element_text(family = "Times New Roman"),  # Set font to Times New Roman
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # Grey background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "grey", color = NA),  # Grey background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # Grey background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+ggplot(data, aes(x = PH)) +
+geom_histogram(binwidth = 5, fill = "#00bfc4", alpha = 0.6, color = "black") +
+geom_density(aes(y = ..count..), color = "red", linewidth = 1.2) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)), color = "blue", linetype = "dashed", linewidth = 1) +
+geom_vline(aes(xintercept = median(PH, na.rm = TRUE)), color = "green", linetype = "dotted", linewidth = 1) +
+annotate("text", x = mean(data$PH, na.rm = TRUE), y = 10, label = paste("Mean:", round(mean(data$PH, na.rm = TRUE), 2)),
+color = "blue", size = 5, hjust = -0.2) +
+ggtitle("Distribution of Plant Height in Experimental Plots") +
+xlab("Plant Height (cm)") +
+ylab("Frequency") +
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5),
+plot.margin = margin(10, 10, 30, 10)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 1) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+xlab("Plant Height (cm)") +
+ylab("Count")
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+text = element_text(family = "Times New Roman"),  # Set font to Times New Roman
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # Grey background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 1) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+aa<-ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+aa<- theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+library(ggplot2)
+aa <- ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+library(ggplot2)
+aa <- ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "PH frequency.png", plot = aa, width = 15, height = 10, dpi = 300, units = "cm")
+library(ggplot2)
+aa <- ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "PH frequency.png", plot = aa, width = 10, height = 8, dpi = 300, units = "cm")
+library(ggplot2)
+aa <- ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "PH frequency.png", plot = aa, width = 15, height = 10, dpi = 300, units = "cm")
+library(ggplot2)
+aa <- ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "PH frequency.png", plot = aa, width = 15, height = 15, dpi = 300, units = "cm")
+library(ggplot2)
+aa <- ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 16),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "PH frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+library(ggplot2)
+aa <- ggplot(data, aes(x = PH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(PH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Plant Height (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "PH frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = TT)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(TT, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Total Tillers") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "TT_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = ET)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(ET, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Effective Tillers") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "ET_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = FLA)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(FLA, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Flag Leaf Area (cm²)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "FLA_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = DTF)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(DTF, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Days to 50% Flowering") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "DTF_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = DTM)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(DTM, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Days to 80% Maturity") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "DTM_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = EHL)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(EHL, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Ear Head Length (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "EHL_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = LFL)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(LFL, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Longest Finger Length (cm)") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "LFL_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = LFL)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(NF, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Number of fingers ") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "nf_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x = NF)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(NF, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Number of fingers ") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "nf_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x =EHW)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(EHW, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Ear head weight (g) ") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "ehw_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x =TSW)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(TSW, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Thousand seed weight (g) ") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "tsw_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x =YPH)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(YPH, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Yield per ear head (g) ") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "yph_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")
+aa <- ggplot(data, aes(x =GY)) +
+geom_histogram(fill = "#00bfc4", alpha = 0.5, bins = 30) +
+geom_vline(aes(xintercept = mean(GY, na.rm = TRUE)),
+color = "black", linetype = "dashed", linewidth = 0.5) +
+xlab("Grain yield (ton/ha) ") +
+ylab("Count") +
+# Apply theme elements
+theme_minimal(base_size = 14) +
+theme(
+panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Adding a black border around the plot
+plot.background = element_rect(fill = "white", color = NA),  # White background
+plot.title = element_text(face = "bold", hjust = 0.5, size = 13),  # Title formatting
+plot.margin = margin(10, 10, 30, 10),  # Add space for text at the top
+plot.caption = element_text(face = "bold", color = "black", size = 14, hjust = 0.5)
+)
+print(aa)
+ggsave(filename = "gy_frequency.png", plot = aa, width = 15, height = 13, dpi = 300, units = "cm")

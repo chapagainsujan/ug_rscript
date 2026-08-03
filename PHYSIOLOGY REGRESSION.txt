@@ -1,0 +1,112 @@
+# ── Load Required Libraries ──────────────────────────────
+library(tidyverse)
+library(patchwork)
+library(showtext)
+
+# ── Set Font ─────────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── Load Data ────────────────────────────────────────────
+ST <- Physio  # Replace with your actual dataframe
+
+# ── Trait Groups with Labels ─────────────────────────────
+trait_groups <- list(
+  "Normalized Difference Vegetation Index (NDVI)"     = c("NDVI1", "NDVI2"),
+  "Canopy Temperature °C (CT)"                        = c("CT1", "CT2"),
+  "Chlorophyll Content (CC)"                          = c("CC1", "CC2"),
+  "SPAD Chlorophyll Content (SPAD)"                   = c("SPAD1", "SPAD2"),
+  "Maximum Quantum Efficiency (Fv/Fm)"                = c("Fv/m1", "Fv/m2"),
+  "Performance Index (Fv/Fo)"                         = c("Fv/o1", "Fv/o2")
+)
+
+# ── Plot Function ────────────────────────────────────────
+plot_regression <- function(trait, trait_fullname, label_letter) {
+  data <- ST %>%
+    select(TRT, YPP, all_of(trait)) %>%
+    filter(TRT %in% c("WW", "WS")) %>%
+    drop_na() %>%
+    mutate(Condition = TRT)
+  
+  data_ws <- filter(data, Condition == "WS")
+  data_ww <- filter(data, Condition == "WW")
+  
+  # Fit models and extract equations
+  eq_ww <- ""
+  eq_ws <- ""
+  if (nrow(data_ww) > 1) {
+    model_ww <- lm(as.formula(paste0("YPP ~ `", trait, "`")), data = data_ww)
+    eq_ww <- paste0("WW: y = ", round(coef(model_ww)[2], 2), "x + ", round(coef(model_ww)[1], 1),
+                    "  R² = ", round(summary(model_ww)$r.squared, 2))
+  }
+  if (nrow(data_ws) > 1) {
+    model_ws <- lm(as.formula(paste0("YPP ~ `", trait, "`")), data = data_ws)
+    eq_ws <- paste0("WS: y = ", round(coef(model_ws)[2], 2), "x + ", round(coef(model_ws)[1], 1),
+                    "  R² = ", round(summary(model_ws)$r.squared, 2))
+  }
+  
+  # Get plotting range
+  x_min <- min(data[[trait]], na.rm = TRUE)
+  x_max <- max(data[[trait]], na.rm = TRUE)
+  y_min <- min(data$YPP, na.rm = TRUE)
+  y_max <- max(data$YPP, na.rm = TRUE)
+  
+  # Create Plot
+  ggplot(data, aes_string(x = paste0("`", trait, "`"), y = "YPP", color = "Condition", shape = "Condition")) +
+    geom_point(size = 3.5) +
+    geom_smooth(method = "lm", se = FALSE, size = 0.8) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+    annotate("text",
+             x = x_min + 0.02 * (x_max - x_min),
+             y = y_max - 0.05 * (y_max - y_min),
+             label = eq_ww, size = 25, family = "Times New Roman", color = "#377EB8", hjust = 0) +
+    annotate("text",
+             x = x_min + 0.02 * (x_max - x_min),
+             y = y_max - 0.12 * (y_max - y_min),
+             label = eq_ws, size = 25, family = "Times New Roman", color = "#E41A1C", hjust = 0) +
+    labs(
+      x = trait,
+      y = "GY (g)",
+      color = "Condition",
+      shape = "Condition"
+    ) +
+    theme_minimal(base_family = "Times New Roman") +
+    theme(
+      axis.text = element_text(size = 65, color = "black", face = "bold"),
+      axis.title = element_text(size = 68, color = "black", face = "bold"),
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      legend.text = element_text(size = 85),
+      panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+      plot.margin = margin(10, 10, 10, 10),
+      plot.title = element_text(size = 70, face = "bold", hjust = 0)
+    ) +
+    ggtitle(label_letter) +
+    scale_color_manual(values = c("WS" = "#E41A1C", "WW" = "#377EB8")) +
+    scale_shape_manual(values = c("WS" = 17, "WW" = 19))
+}
+
+# ── Generate All Plots ───────────────────────────────────
+plots <- list()
+labels <- LETTERS[1:12]
+i <- 1
+
+for (trait_name in names(trait_groups)) {
+  for (j in 1:2) {
+    trait_short <- trait_groups[[trait_name]][j]
+    p <- plot_regression(trait_short, trait_name, labels[i])
+    plots[[i]] <- p
+    i <- i + 1
+  }
+}
+
+# ── Combine Plots ────────────────────────────────────────
+combined_plot <- wrap_plots(plots, ncol = 3, guides = "collect") &
+  theme(legend.position = "bottom")
+
+# ── Save Output ──────────────────────────────────────────
+ggsave(
+  "Trait_vs_YPP_EqBoxed_WWtop_WSbelow.tiff",
+  combined_plot,
+  width = 25, height = 20, dpi = 300, units = "in", device = "tiff", bg = "white"
+)
