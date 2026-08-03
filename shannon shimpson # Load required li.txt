@@ -1,0 +1,49 @@
+shannon shimpson # Load required libraries
+library(ggplot2)
+library(dplyr)
+
+# Create data frame
+data <- data.frame(
+  Qualitative_Trait = c("Plant Growth Habit", "Blast Resistance", "Pigmentation at Leaf Juncture",
+                        "Stem Clum Branching", "Finger Branching", "Position of Finger", 
+                        "Finger Multiple Whorl Branching", "Spikelet Density", "Lodging Susceptibility", 
+                        "Inflorescence Colour", "Anther Colour", "Node Pigmentation", 
+                        "Leaf Blade Intensity of Colour", "Leaf Sheath Pubescence", 
+                        "Leaf Blade Pubescence", "Ear Shape", "Glume Colour", "Spikelet Discontinuity", 
+                        "Ear Size", "Grain Covering", "Grain per Spikelet", "Synchrony of Ear Maturity", 
+                        "Spikelet Shattering", "Pericarp Persistence after Threshing", 
+                        "Grain Intensity of Colour", "Grain Shape", "Grain Surface", "Grain Uniformity", 
+                        "Grain Colour", "Plant Total Bushing"),
+  Shannon_Index = c(0.000, 1.247, 0.576, 0.681, 0.681, 0.692, 0.692, 0.993, 0.910, 0.534, 
+                    0.436, 0.624, 1.022, 0.000, 0.917, 1.517, 1.211, 0.692, 1.020, 0.993, 
+                    0.633, 0.576, 0.692, 0.692, 1.060, 0.825, 0.515, 0.515, 1.297, 0.708)
+)
+
+# Sort data by Shannon Index values for better visualization
+data <- data %>% arrange(desc(Shannon_Index))
+
+# Define color palette with specified colors
+custom_colors <- c("#F26C4F", "#2B7DBB", "#5FAACB", "#8DC6D9", "#A2D9D9", 
+                   "#F2B134", "#F28705")
+
+# Create the bar plot with the specified colors and Times New Roman font
+aa<-ggplot(data, aes(x = reorder(Qualitative_Trait, Shannon_Index), y = Shannon_Index, fill = Shannon_Index)) +
+  geom_bar(stat = "identity", width = 0.7, color = "black") +  # Add black border for contrast
+  coord_flip() +  # Flip coordinates for better readability
+  scale_fill_gradientn(colors = custom_colors) +  # Apply custom gradient colors
+  labs(
+       x = "Qualitative Trait",
+       y = "Shannon Index") +
+  theme_gray(base_size = 14) +  # Apply a grey theme with a professional look
+  theme(
+    text = element_text(family = "Times New Roman"),  # Set font to Times New Roman
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),  # Add border to the plot
+    panel.background = element_rect(fill = "grey95"),  # Light grey background
+    panel.grid.major = element_line(color = "grey80", linetype = "dashed"),  # Dashed grid lines
+    legend.position = "right"  # Place legend to the right
+  ) +
+  geom_text(aes(label = round(Shannon_Index, 3)), hjust = 1.1, size = 4, color = "black")  # Add data labels
+ggsave(filename = "Box11 Plot Plant Heigh345t.png", plot = aa,width = 30, height = 23, dpi = 2500, units = "cm")

@@ -1,0 +1,81 @@
+# Load required libraries
+library(ggplot2)
+library(factoextra)
+library(dplyr)
+
+# Load data
+data <- FM_final
+
+# Convert Landraces to character
+data$Landraces <- as.character(data$Landraces)
+
+# Convert tibble to a data frame
+FM <- as.data.frame(data)
+
+# Set row names as Landraces
+rownames(FM) <- FM$Landraces
+
+# Remove the first column (Landraces) to keep only numeric data
+df <- FM[, -1]
+
+# Remove any missing values
+df <- na.omit(df)
+
+# Scale the data (standardization)
+df.scaled <- scale(df)
+
+# Compute distance matrix using Euclidean distance
+res.dist <- dist(df.scaled, method = "euclidean")
+
+# Perform hierarchical clustering
+hc <- hclust(res.dist, method = "ward.D2")
+
+# Get cluster assignments
+clusters <- cutree(hc, k = 4)  # Cut tree into 4 clusters
+
+# Calculate cluster midpoint positions for labeling
+cluster_positions <- aggregate(hc$order, by = list(Cluster = clusters[hc$order]), FUN = mean)
+colnames(cluster_positions) <- c("Cluster", "x")
+
+# Assign correct cluster names and adjust label positions manually
+cluster_positions <- cluster_positions %>%
+  arrange(x) %>%
+  mutate(label = c("Cluster III", "Cluster II", "Cluster I", "Cluster IV"),
+         x = x + c(-1, 4.2, 5, 4.5))  # Adjust x positions for better spacing
+
+# Visualize dendrogram
+AA <- fviz_dend(hc, 
+                cex = 0.7,                # Label size
+                lwd = 0.8,                # Line width
+                k = 4,                    # Number of clusters
+                rect = TRUE,              # Draw rectangles around clusters
+                rect_fill = TRUE,         # Fill rectangles with colors
+                rect_border = "jco",      # Cluster rectangle border colors
+                k_colors = "jco",         # Cluster colors
+                label_cols = "black",     # Labels in black
+                main = "", 
+                xlab = "Landraces") +    
+  theme(
+    text = element_text(family = "Times New Roman"),  # Apply Times New Roman globally
+    axis.title.x = element_text(size = 14, family = "Times New Roman"),
+    axis.text.x = element_text(size = 12, family = "Times New Roman"),
+    axis.text.y = element_text(size = 12, family = "Times New Roman"),
+    plot.title = element_text(size = 16, family = "Times New Roman"),
+    legend.text = element_text(size = 12, family = "Times New Roman"),
+    legend.title = element_text(size = 14, family = "Times New Roman"),
+    
+    # Ensure grid lines are dotted but do NOT overlap with rectangles
+    panel.background = element_rect(fill = "white"),  # White background
+    panel.grid.major = element_line(color = "grey70", linetype = "dotted"),  # Dotted grid lines
+    panel.grid.minor = element_blank()  # Remove minor grid lines
+  ) +
+  
+  # Add cluster labels at a slightly higher position
+  geom_text(data = cluster_positions, aes(x = x, y = -2.3, label = label),  # Move labels up
+            family = "Times New Roman", size = 4, fontface = "plain")  # Not bold
+
+# Print the dendrogram
+AA
+
+# Save the dendrogram
+ggsave(filename = "Cluster0000.png", plot = AA, width = 23, height = 18, dpi = 300, units = "cm")

@@ -1,0 +1,11 @@
+# Load necessary libraries
+library(metan)
+library(ggplot2)
+
+# Calculate the correlation coefficients
+AB = corr_coef(Millet, 3:16)
+
+# Save the plot as a PNG file
+png("correlation_plo13456345t.png", width = 22, height = 20, units = "cm", res = 1500) # Specify the file name and size
+plot(AB)  # Plot the correlation
+dev.off()  # Close the device to save the file

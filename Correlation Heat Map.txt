@@ -1,0 +1,72 @@
+# Load required libraries
+library(ggplot2)
+library(reshape2)
+
+# Load data from Excel file (Assuming Millet is already loaded)
+data <- Millet  
+
+# Compute correlation matrix (Ensure numerical columns are selected)
+num_data <- data[sapply(data, is.numeric)]  # Select only numeric columns
+cor_matrix <- cor(num_data, use = "complete.obs")
+
+# Compute significance levels
+p_matrix <- matrix(NA, ncol = ncol(num_data), nrow = ncol(num_data))
+colnames(p_matrix) <- rownames(p_matrix) <- colnames(cor_matrix)
+
+for (i in 1:ncol(num_data)) {
+  for (j in 1:ncol(num_data)) {
+    if (i > j) {  # Only compute for lower triangle
+      test <- cor.test(num_data[[i]], num_data[[j]])
+      p_matrix[i, j] <- test$p.value
+      cor_matrix[i, j] <- cor_matrix[i, j]  # Keep correlation values for lower triangle
+    } else {
+      p_matrix[i, j] <- NA
+      cor_matrix[i, j] <- NA  # Hide upper triangle values
+    }
+  }
+}
+
+# Define significance levels
+get_significance <- function(p) {
+  if (p < 0.001) return("***")
+  else if (p < 0.01) return("**")
+  else if (p < 0.05) return("*")
+  else return("ns")
+}
+
+# Convert correlation matrix to long format
+melted_cor <- melt(cor_matrix, na.rm = TRUE)
+melted_p <- melt(p_matrix, na.rm = TRUE)
+melted_cor$significance <- sapply(melted_p$value, get_significance)
+
+# Create the heatmap with adjusted text annotation
+p <- ggplot(melted_cor, aes(Var1, Var2, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "#f07569", mid = "white", high = "#12a3c7", midpoint = 0, 
+                       limits = c(-1, 1),  
+                       guide = guide_colorbar(title.position = "top")) +  
+  geom_text(aes(label = paste0(round(value, 2), "\n", significance)), color = "black", size = 3) +
+  scale_y_discrete(position = "right") +  
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),  
+    panel.background = element_rect(fill = "white", color = NA), 
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 0.5, family = "Times New Roman", color = "black"),  # Horizontal labels
+    axis.text.y = element_text(family = "Times New Roman", color = "black"),  
+    axis.ticks = element_blank(),   
+    axis.title = element_blank(),   
+    legend.position = c(0.1, 0.9),  
+    legend.direction = "horizontal",  
+    legend.title = element_text(family = "Times New Roman", face = "plain"),  
+    legend.text = element_text(family = "Times New Roman")  
+  ) +
+  labs(fill = "Pearson's\ncorrelation") +  
+  annotate("text", x = 2, y = 1, 
+           label = "ns p≥0.05; *p<0.05; **p<0.01; ***p<0.001", 
+           hjust = 0.39, vjust = -65, 
+           family = "Times New Roman", fontface = "italic", size = 2.5, color = "black")  
+
+# Save the plot
+ggsave("Mille326t_correlation.png", p, width = 7, height = 6, dpi = 300, bg = "white")
