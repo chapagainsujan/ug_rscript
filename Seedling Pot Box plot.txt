@@ -1,0 +1,56 @@
+library(dplyr)
+library(ggplot2)
+
+# Assuming 'SD' is your main dataset with 'TRT' and 'RS' columns
+aggregated_data <- SD %>%
+  group_by(TRT) %>%
+  summarize(RS = mean(RS, na.rm = TRUE))  # Calculate mean Root to Shoot Ratio per treatment
+
+AA <- ggplot(SD, aes(x = TRT, y = RS)) +
+  # Boxplot with white fill and colored outline
+  geom_boxplot(aes(color = TRT), 
+               outlier.shape = NA,  # Outliers are not displayed
+               size = 1.2, fill = "white") +  # White box with outline for better visibility
+  
+  # Add points for all genotypes in each treatment (centered)
+  geom_point(aes(color = TRT), 
+             position = position_dodge(width = 0), # Ensures points align vertically
+             size = 3, alpha = 0.6, shape = 20) +  # Filled circles (16) for individual genotypes
+  
+  # Add mean points for each treatment
+  geom_point(data = aggregated_data, 
+             aes(x = TRT, y = RS), 
+             shape = 18,    # Diamond shape for treatment means
+             color = "black", 
+             size = 4) +  # Larger size for clarity
+  
+  # Add vertical line (dot) for mean of each genotype in each treatment
+  stat_summary(fun = mean, geom = "point", 
+               shape = 16, size = 3, color = "black", 
+               position = position_dodge(width = 0)) +  # Shows average for each treatment
+  
+  # Customize labels
+  labs(y = "Root to Shoot Ratio", x = "Moisture Condition") +  # Label axes
+  
+  # Brighter custom color fill for treatments
+  scale_color_manual(values = c("FC" = "#00AFBB", "S1" = "#E7B800", "S2" = "#FC4E07")) +  # Specific colors for treatments
+  scale_fill_manual(values = c("FC" = "#00AFBB", "S1" = "#E7B800", "S2" = "#FC4E07")) +  # Specific colors for box fill
+  
+  theme_minimal() +  # Minimal theme for a clean look
+  theme(
+    text = element_text(family = "Times New Roman"),  # Set all text to Times New Roman for uniformity
+    axis.title.x = element_text(size = 14),  # Larger axis title text for readability
+    axis.title.y = element_text(size = 14),  # Larger axis title text for readability
+    axis.text.x = element_text(size = 12),  # Adjust axis text size for clarity
+    axis.text.y = element_text(size = 12),  # Adjust axis text size for clarity
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  # Title size and boldness
+    legend.position = "none",  # Removes the legend since colors are self-explanatory
+    panel.border = element_rect(color = "black", fill = NA, size = 0.7)  # Adds rectangular border to the plot
+  )
+
+# Display the plot
+AA
+
+
+# Save the plot
+ggsave(filename = "Box11_Plot_Root_to_Shoot_Ratio.png", plot = AA, width = 14, height = 13, dpi = 400, units = "cm")

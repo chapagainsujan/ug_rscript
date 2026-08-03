@@ -1,0 +1,422 @@
+# ==========================================================
+# 1. Load Packages
+# ==========================================================
+library(tidyverse)
+library(patchwork)
+library(ggpubr)
+library(purrr)
+
+# ==========================================================
+# 2. Load Data (your file already loaded as ss)
+# ==========================================================
+df <- data  # change if needed
+
+# ==========================================================
+# 3. Identify 60 vs 90 DAS Traits
+# ==========================================================
+traits_60 <- grep("60$", names(df), value = TRUE)
+traits_90 <- gsub("60$", "90", traits_60)
+
+trait_pairs <- tibble(
+  Trait = gsub("60$", "", traits_60),
+  T60   = traits_60,
+  T90   = traits_90
+)
+
+# ==========================================================
+# 4. Plot Function
+# ==========================================================
+plot_trait <- function(tr, t60, t90, tag_letter) {
+  
+  # Reshape
+  d <- df %>%
+    select(all_of(c(t60, t90))) %>%
+    pivot_longer(cols = everything(),
+                 names_to = "Time",
+                 values_to = "Value") %>%
+    mutate(Time = ifelse(Time == t60, "60 DAS", "90 DAS"))
+  
+  # Summary
+  s <- d %>%
+    group_by(Time) %>%
+    summarise(
+      mean = mean(Value, na.rm = TRUE),
+      sd   = sd(Value, na.rm = TRUE),
+      n    = n(),
+      se   = sd / sqrt(n),
+      .groups = "drop"
+    )
+  
+  # Y limits for significance
+  ymax <- max(s$mean + s$se, na.rm = TRUE)
+  y1 <- ymax + 0.05 * ymax
+  y2 <- ymax + 0.10 * ymax
+  
+  # T-test
+  p <- t.test(Value ~ Time, data = d)$p.value
+  sig <- ifelse(p < 0.001, "***",
+                ifelse(p < 0.01, "**",
+                       ifelse(p < 0.05, "*", "ns")))
+  
+  # ----------------------------------------------------------
+  # Plot
+  # ----------------------------------------------------------
+  g <- ggplot(s, aes(Time, mean, fill = Time)) +
+    
+    geom_col(width = 0.55, color = "black", linewidth = 1) +
+    geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
+                  width = 0.1, linewidth = 0.8) +
+    
+    # Bracket + significance
+    annotate("segment", x = 1, xend = 2, y = y1, yend = y1, size = 1) +
+    annotate("segment", x = 1, xend = 1, y = y1, yend = y1 - 0.03*ymax, size = 1) +
+    annotate("segment", x = 2, xend = 2, y = y1, yend = y1 - 0.03*ymax, size = 1) +
+    annotate("text", x = 1.5, y = y2, label = sig,
+             size = 12, fontface = "bold",
+             family = "Times New Roman") +
+    
+    scale_fill_manual(values = c("60 DAS" = "#1F77B4", "90 DAS" = "#FF7F0E")) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
+    
+    labs(title = tr, tag = tag_letter, fill = "Time (DAS)") +
+    
+    theme_minimal(base_family = "Times New Roman") +
+    theme(
+      
+      # Legend
+      legend.position = "bottom",
+      legend.title = element_text(size = 26, face = "bold"),
+      legend.text  = element_text(size = 28),
+      
+      # Axis
+      axis.title = element_blank(),
+      axis.text.x = element_text(size = 0, face = "bold"),
+      axis.text.y = element_text(size = 24, face = "bold"),
+      
+      # Title & tag
+      plot.title = element_text(size = 24, face = "bold",
+                                hjust = 0, margin = margin(b = -5)),
+      plot.tag = element_text(size = 36, face = "bold",
+                              hjust = -0.15, vjust = 1),
+      
+      # Border only left and bottom
+      panel.border = element_blank(),
+      axis.line.x = element_line(color = "black", size = 0.9),
+      axis.line.y = element_line(color = "black", size = 1.1)
+    )
+  
+  return(g)
+}
+
+# ==========================================================
+# 5. Generate All Plots
+# ==========================================================
+plot_list <- pmap(
+  list(
+    trait_pairs$Trait,
+    trait_pairs$T60,
+    trait_pairs$T90,
+    LETTERS[1:nrow(trait_pairs)]
+  ),
+  plot_trait
+)
+
+# Fill empty positions (if < 12)
+needed <- 12
+if (length(plot_list) < needed) {
+  plot_list <- c(
+    plot_list,
+    rep(list(patchwork::plot_spacer()), needed - length(plot_list))
+  )
+}
+
+# ==========================================================
+# 6. Combine into 3 rows × 4 columns grid
+# ==========================================================
+final_plot <- wrap_plots(
+  plotlist = plot_list,
+  ncol = 4, nrow = 3,
+  guides = "collect"
+) &
+  theme(legend.position = "bottom")
+
+# ==========================================================
+# 7. Save High-Resolution PNG
+# ==========================================================
+ggsave(
+  filename = "Trait_Comparison_3x4.png",
+  plot = final_plot,
+  width = 26,
+  height = 18,
+  dpi = 350
+)
+
+
+
+# ---------------------------
+# 1. Load Packages
+# ---------------------------
+library(dplyr)
+library(Hmisc)       # rcorr()
+library(reshape2)
+library(ggplot2)
+library(RColorBrewer)
+
+# ---------------------------
+# 2. Numeric data preparation
+# ---------------------------
+df <- data   # replace with your dataframe
+num_df <- df %>% select(where(is.numeric))
+
+# Remove zero-variance columns
+zero_var <- sapply(num_df, function(x) var(x, na.rm = TRUE) == 0)
+num_df <- num_df[, !zero_var]
+
+# ---------------------------
+# 3. Compute correlation + p-values
+# ---------------------------
+corr_res <- rcorr(as.matrix(num_df), type = "pearson")
+corr  <- corr_res$r
+pval  <- corr_res$P
+
+# ---------------------------
+# 4. Melt into long format
+# ---------------------------
+corr_df <- melt(corr, varnames = c("Trait1", "Trait2"), value.name = "Correlation")
+p_df    <- melt(pval, varnames = c("Trait1", "Trait2"), value.name = "pvalue")
+plot_df <- left_join(corr_df, p_df, by = c("Trait1", "Trait2"))
+
+# ---------------------------
+# 5. Identify significant correlations
+# ---------------------------
+plot_df <- plot_df %>%
+  mutate(Significant = ifelse(pvalue < 0.05, "Yes", "No"),
+         CorrGroup = case_when(
+           Significant == "Yes" & Correlation > 0 ~ "Positive",
+           Significant == "Yes" & Correlation < 0 ~ "Negative",
+           TRUE ~ "NS"
+         ))
+
+# ---------------------------
+# 6. Compute clustering order (using only significant correlations)
+# ---------------------------
+sig_corr <- corr
+sig_corr[pval >= 0.05] <- 0
+sig_corr[is.na(sig_corr)] <- 0
+
+# Distance matrix and hierarchical clustering
+dist_mat <- as.dist(1 - sig_corr)
+clust <- hclust(dist_mat, method = "average")
+order_traits <- clust$labels[clust$order]
+
+# Apply clustering order to factors
+plot_df$Trait1 <- factor(plot_df$Trait1, levels = order_traits)
+plot_df$Trait2 <- factor(plot_df$Trait2, levels = order_traits)
+
+
+# ---------------------------
+# 7. Plot heatmap with customized legend labels
+# ---------------------------
+heatmap_plot <- ggplot(plot_df, aes(Trait1, Trait2, fill = CorrGroup)) +
+  geom_tile(color = "grey90") +
+  scale_fill_manual(
+    values = c(
+      "Positive" = "#1F77B4", 
+      "Negative" = "#FF7F0E",  
+      "NS" = "white"
+    ),
+    labels = c(
+      "Positive" = "Sig. (+ve)",
+      "Negative" = "Sig. (-ve)",
+      "NS" = "NS"
+    )
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, family = "Times New Roman", face = "bold", color = "black"),
+    axis.text.y = element_text(family = "Times New Roman", face = "bold", color = "black"),
+    axis.title = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.grid = element_blank()
+  ) +
+  guides(fill = guide_legend(title = NULL))  # Remove legend title
+
+# Display heatmap
+print(heatmap_plot)
+
+# ---------------------------
+# 8. Save as PNG
+# ---------------------------
+ggsave(filename = "correlation_heatmap_clustered.png",
+       plot = heatmap_plot,
+       width = 10, height = 8, units = "in", dpi = 300)
+
+
+
+# -------------------------------------------------------
+# 1. Load Packages
+# -------------------------------------------------------
+library(tidyverse)
+library(patchwork)
+library(scales)
+
+# -------------------------------------------------------
+# 2. Input Dataset
+# -------------------------------------------------------
+df <- tribble(
+  ~Year, ~Month, ~Tmax_morn, ~Tmin_morn, ~Tavg_morn, ~Tmax_aft, ~Tmin_aft, ~Tavg_aft, ~Rain, ~RH,
+  2023, "Nov", 28.03, 13.50, 20.77, 27.88, 18.00, 22.94, 0,    82,
+  2023, "Dec", 24.92, 10.45, 17.69, 24.70, 12.90, 18.80, 0,    82,
+  2024, "Jan", 24.85,  8.70, 16.78, 25.24, 11.52, 18.38, 0,    62,
+  2024, "Feb", 25.35,  8.11, 16.73, 25.53, 13.10, 19.32, 0,    59,
+  2024, "Mar", 30.30, 14.10, 22.20, 31.03, 20.43, 25.73, 24.4, 59,
+  2024, "Apr", 37.30, 17.78, 27.54, 37.95, 27.58, 32.77, 0,    50,
+  2024, "May", 37.53, 23.40, 30.47, 37.04, 28.87, 32.96, 99.5, 70
+)
+
+df$Month <- factor(df$Month, levels = c("Nov","Dec","Jan","Feb","Mar","Apr","May"))
+
+# -------------------------------------------------------
+# 3. Panel 1: Morning Temperatures + Rainfall
+# -------------------------------------------------------
+p_morning <- ggplot(df, aes(x = Month)) +
+  geom_col(aes(y = Rain), fill = "skyblue", alpha = 0.5, width = 0.5) +
+  geom_line(aes(y = Tmax_morn, color = "Tmax"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmax_morn, color = "Tmax"), size = 3) +
+  geom_line(aes(y = Tmin_morn, color = "Tmin"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmin_morn, color = "Tmin"), size = 3) +
+  geom_line(aes(y = Tavg_morn, color = "Tavg"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tavg_morn, color = "Tavg"), size = 3) +
+  scale_y_continuous(
+    name = "Temperature (°C)",
+    sec.axis = sec_axis(~., name = "Rainfall (mm)")
+  ) +
+  scale_color_manual(values = c("Tmax" = "red", "Tmin" = "blue", "Tavg" = "orange")) +
+  theme_bw(base_size = 16) +
+  labs(title = "Morning Weather with Rainfall") +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    plot.title = element_text(face = "bold", size = 18)
+  )
+
+# -------------------------------------------------------
+# 4. Panel 2: Afternoon Temperatures + Relative Humidity
+# -------------------------------------------------------
+p_afternoon <- ggplot(df, aes(x = Month)) +
+  geom_line(aes(y = Tmax_aft, color = "Tmax"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmax_aft, color = "Tmax"), size = 3) +
+  geom_line(aes(y = Tmin_aft, color = "Tmin"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmin_aft, color = "Tmin"), size = 3) +
+  geom_line(aes(y = Tavg_aft, color = "Tavg"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tavg_aft, color = "Tavg"), size = 3) +
+  geom_line(aes(y = RH/2, color = "RH"), linetype = "dashed", size = 1.2, group = 1) +
+  scale_y_continuous(
+    name = "Temperature (°C)",
+    sec.axis = sec_axis(~.*2, name = "Relative Humidity (%)")
+  ) +
+  scale_color_manual(values = c("Tmax" = "red", "Tmin" = "blue", "Tavg" = "orange", "RH" = "darkgreen")) +
+  theme_bw(base_size = 16) +
+  labs(title = "Afternoon Weather with Relative Humidity") +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    plot.title = element_text(face = "bold", size = 18)
+  )
+
+# -------------------------------------------------------
+# 5. Combine Panels (Vertical)
+# -------------------------------------------------------
+final_plot <- p_morning / p_afternoon
+
+# Show
+final_plot
+
+# -------------------------------------------------------
+# 6. Save as High-Quality PNG
+# -------------------------------------------------------
+ggsave("Weather_MorningAfternoon.png", final_plot, width = 14, height = 16, dpi = 300, bg = "white")
+# -------------------------------------------------------
+# 1. Load Packages
+# -------------------------------------------------------
+library(tidyverse)
+library(patchwork)
+library(scales)
+
+# -------------------------------------------------------
+# 2. Input Dataset
+# -------------------------------------------------------
+df <- tribble(
+  ~Year, ~Month, ~Tmax_morn, ~Tmin_morn, ~Tavg_morn, ~Tmax_aft, ~Tmin_aft, ~Tavg_aft, ~Rain, ~RH,
+  2023, "Nov", 28.03, 13.50, 20.77, 27.88, 18.00, 22.94, 0,    82,
+  2023, "Dec", 24.92, 10.45, 17.69, 24.70, 12.90, 18.80, 0,    82,
+  2024, "Jan", 24.85,  8.70, 16.78, 25.24, 11.52, 18.38, 0,    62,
+  2024, "Feb", 25.35,  8.11, 16.73, 25.53, 13.10, 19.32, 0,    59,
+  2024, "Mar", 30.30, 14.10, 22.20, 31.03, 20.43, 25.73, 24.4, 59,
+  2024, "Apr", 37.30, 17.78, 27.54, 37.95, 27.58, 32.77, 0,    50,
+  2024, "May", 37.53, 23.40, 30.47, 37.04, 28.87, 32.96, 99.5, 70
+)
+
+df$Month <- factor(df$Month, levels = c("Nov","Dec","Jan","Feb","Mar","Apr","May"))
+
+# -------------------------------------------------------
+# 3. Panel 1: Morning Temperatures + Rainfall
+# -------------------------------------------------------
+p_morning <- ggplot(df, aes(x = Month)) +
+  geom_col(aes(y = Rain), fill = "skyblue", alpha = 0.5, width = 0.5) +
+  geom_line(aes(y = Tmax_morn, color = "Tmax"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmax_morn, color = "Tmax"), size = 3) +
+  geom_line(aes(y = Tmin_morn, color = "Tmin"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmin_morn, color = "Tmin"), size = 3) +
+  geom_line(aes(y = Tavg_morn, color = "Tavg"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tavg_morn, color = "Tavg"), size = 3) +
+  scale_y_continuous(
+    name = "Temperature (°C)",
+    sec.axis = sec_axis(~., name = "Rainfall (mm)")
+  ) +
+  scale_color_manual(values = c("Tmax" = "red", "Tmin" = "blue", "Tavg" = "orange")) +
+  theme_bw(base_size = 16) +
+  labs(title = "Morning (8:45 am)") +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    plot.title = element_text(face = "bold", size = 18)
+  )
+
+# -------------------------------------------------------
+# 4. Panel 2: Afternoon Temperatures + Relative Humidity
+# -------------------------------------------------------
+p_afternoon <- ggplot(df, aes(x = Month)) +
+  geom_line(aes(y = Tmax_aft, color = "Tmax"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmax_aft, color = "Tmax"), size = 3) +
+  geom_line(aes(y = Tmin_aft, color = "Tmin"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tmin_aft, color = "Tmin"), size = 3) +
+  geom_line(aes(y = Tavg_aft, color = "Tavg"), size = 1.2, group = 1) +
+  geom_point(aes(y = Tavg_aft, color = "Tavg"), size = 3) +
+  geom_line(aes(y = RH/2, color = "RH"), linetype = "dashed", size = 1.2, group = 1) +
+  scale_y_continuous(
+    name = "Temperature (°C)",
+    sec.axis = sec_axis(~.*2, name = "Relative Humidity (%)")
+  ) +
+  scale_color_manual(values = c("Tmax" = "red", "Tmin" = "blue", "Tavg" = "orange", "RH" = "darkgreen")) +
+  theme_bw(base_size = 16) +
+  labs(title = "Afternoon (5:45 pm)") +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    plot.title = element_text(face = "bold", size = 18)
+  )
+
+# -------------------------------------------------------
+# 5. Combine Panels (Vertical)
+# -------------------------------------------------------
+final_plot <- p_morning / p_afternoon
+
+# Show
+final_plot
+
+# -------------------------------------------------------
+# 6. Save as High-Quality PNG
+# -------------------------------------------------------
+ggsave("Weather_MorningAfternoon.png", final_plot, width = 14, height = 16, dpi = 300, bg = "white")

@@ -1,0 +1,38 @@
+# Load library
+library(ggplot2)
+
+# Data frame
+gy_data <- 
+
+# Order data
+gy_data <- gy_data[order(gy_data$GY_reduction), ]
+gy_data$Genotype <- factor(gy_data$Genotype, levels = gy_data$Genotype)
+
+# Save TIFF
+tiff("GY_Reduction_Barplot1122.png", width = 10, height = 6, units = "cm", res = 300)
+
+# Plot
+ggplot(gy_data, aes(x = Genotype, y = GY_reduction, fill = GY_reduction)) +
+  geom_bar(stat = "identity", width = 0.7, show.legend = FALSE) +  # thinner bars, no legend
+  scale_fill_gradient(low = "#ffb09c", high = "red") +
+  geom_text(aes(label = round(GY_reduction, 1)),
+            vjust = -0.3, size = 4, family = "Times", color = "black") +
+  labs(x = "Genotypes", y = "Grain Yield Reduction (%)") +
+  scale_y_continuous(expand = c(0, 0)) +  # remove bottom gap
+  theme_minimal(base_family = "Times") +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 13, family = "Times", color = "black"),
+    axis.text.y = element_text(size = 11, family = "Times", color = "black"),
+    axis.title = element_text(size = 12, family = "Times", color = "black"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.line.x = element_line(color = "black"), 
+    axis.line.y = element_line(color = "black"),
+    plot.margin = unit(c(1, 1, 1, 1), "lines"),
+    panel.background = element_blank()
+  ) +
+  coord_cartesian(clip = "off")
+
+# Close device
+dev.off()
