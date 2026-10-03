@@ -1,0 +1,362 @@
+# ── 1. Load Required Libraries ───────────────────────────────
+library(ggplot2)
+library(patchwork)
+
+data <- manish   # your dataset
+
+# ── 2. Global Theme (Light Gray, No Outer Boundary) ──────────
+theme_set(
+  theme_gray(base_family = "Times New Roman") +
+    theme(
+      axis.title.x  = element_text(size = 16),
+      axis.title.y  = element_text(size = 16),
+      axis.text.x   = element_text(size = 14),
+      axis.text.y   = element_text(size = 14),
+      plot.title    = element_text(size = 18, face = "bold", hjust = 0.5),
+      legend.position = "none",
+      
+      panel.background = element_rect(fill = "gray95", color = NA),
+      panel.grid.major = element_line(color = "gray85", size = 0.4),
+      panel.grid.minor = element_line(color = "gray93", size = 0.2),
+      
+      panel.border = element_blank(),
+      axis.line = element_line(color = "black", size = 0),
+      
+      plot.tag = element_text(size = 20, face = "bold")
+    )
+)
+
+# ── 3. Boxplot Function (Trait Name as X-axis Label, OUTSIDE) ─
+create_boxplot <- function(data, var_name, y_units) {
+  
+  overall_mean <- mean(data[[var_name]], na.rm = TRUE)
+  
+  genotype_means <- aggregate(
+    as.formula(paste(var_name, "~ GEN")),
+    data = data, FUN = mean
+  )
+  
+  ggplot(data, aes(x = "", y = .data[[var_name]])) +
+    geom_boxplot(
+      fill = "white",
+      color = "#E69F00",
+      outlier.shape = NA,
+      linewidth = 1.1
+    ) +
+    geom_point(
+      data = genotype_means,
+      aes(x = "", y = .data[[var_name]]),
+      shape = 18,
+      color = "#E69F00",
+      size = 3
+    ) +
+    annotate("point", x = 1, y = overall_mean,
+             shape = 16, color = "black", size = 3) +
+    
+    # Trait name OUTSIDE as x-axis title
+    xlab(var_name) +
+    ylab(y_units) +
+    
+    theme(
+      axis.text.x = element_blank(),     # hide default x-axis ticks
+      axis.ticks.x = element_blank(),
+      plot.margin = margin(10, 10, 25, 10)  # space for x-axis title
+    )
+}
+
+# ── 4. Maize Traits (12 Only → 3×4 Layout) ───────────────────
+vars <- list(
+  list("TD",   "days"),
+  list("SD",   "days"),
+  list("ASI",  "days"),
+  list("PH",   "cm"),
+  list("EH",   "cm"),
+  list("NCHP","(n)"),
+  list("CD",   "cm"),
+  list("CL",   "cm"),
+  list("NRPC","(n)"),
+  list("NGPR","(n)"),
+  list("TGW", "g"),
+  list("GY",  "t/ha")
+)
+
+# ── 5. Generate Boxplots (12 Plots) ──────────────────────────
+plots <- lapply(vars, function(v) {
+  create_boxplot(data, v[[1]], v[[2]])
+})
+
+# ── 6. Arrange in 3 × 4 Grid with Tags ───────────────────────
+final_plot <- wrap_plots(plots, ncol = 4, nrow = 3) +
+  plot_annotation(
+    tag_levels = "a",
+    theme = theme(plot.tag = element_text(size = 22, face = "bold"))
+  )
+
+# ── 7. Save PNG High Quality ─────────────────────────────────
+ggsave(
+  filename = "Maize_Boxplot_3x4.png",
+  plot = final_plot,
+  width = 30,
+  height = 24,
+  units = "cm",
+  dpi = 600,
+  device = "png"
+)
+
+
+
+
+# Load necessary libraries
+library(ggplot2)
+library(ggrepel)
+library(factoextra)
+library(FactoMineR)
+
+# Load dataset
+df <- manish
+
+# Remove non-numeric columns
+df_pca <- df[, !(names(df) %in% c("GEN"))]
+
+# PCA
+pca_res <- PCA(df_pca, scale.unit = TRUE, graph = FALSE)
+
+# Extract scores and loadings
+pca_ind <- as.data.frame(pca_res$ind$coord)
+pca_var <- as.data.frame(pca_res$var$coord)
+
+# Add genotype labels
+pca_ind$GEN <- df$GEN
+
+# Representation quality
+pca_var$QV <- rowSums(pca_res$var$cos2[, 1:2])
+pca_ind$QI <- rowSums(pca_res$ind$cos2[, 1:2])
+
+# PCA biplot
+a <- ggplot() +
+  geom_point(data = pca_ind,
+             aes(x = Dim.1, y = Dim.2, size = QI),
+             shape = 21, fill = "#B2BEB5", color = "#FFA500",
+             stroke = 0.6, alpha = 0.6) +
+  
+  geom_text_repel(data = pca_ind,
+                  aes(x = Dim.1, y = Dim.2, label = GEN),
+                  color = "black",
+                  family = "Times New Roman",
+                  box.padding = 0.5,
+                  point.padding = 0.3,
+                  force = 3,
+                  max.overlaps = Inf,
+                  segment.color = NA) +
+  
+  geom_segment(data = pca_var,
+               aes(x = 0, y = 0, xend = Dim.1 * 5, yend = Dim.2 * 5, color = QV),
+               arrow = arrow(length = unit(0.2, "inches")),
+               linewidth = 1) +
+  
+  geom_text_repel(data = pca_var,
+                  aes(x = Dim.1 * 5, y = Dim.2 * 5, label = rownames(pca_var)),
+                  color = "brown", size = 4, family = "Times New Roman",
+                  box.padding = 0.5, point.padding = 0.3,
+                  force = 5, max.overlaps = Inf, segment.color = NA) +
+  
+  geom_hline(yintercept = 0, linetype = "dotted", color = "black", linewidth = 1) +
+  geom_vline(xintercept = 0, linetype = "dotted", color = "black", linewidth = 1) +
+  
+  theme_minimal(base_family = "Times New Roman") +
+  scale_color_gradient(low = "#454545", high = "red") +
+  scale_size_continuous(range = c(2, 6)) +
+  
+  labs(
+    title = "Principal Component Analysis (PCA)\nBiplot for Maize Genotypes and Traits",
+    x = paste0("PC1 (", round(pca_res$eig[1,2], 1), "%)"),
+    y = paste0("PC2 (", round(pca_res$eig[2,2], 1), "%)"),
+    color = "QV",
+    size = "QI"
+  ) +
+  
+  theme(
+    legend.position = "right",
+    legend.box = "vertical",
+    text = element_text(family = "Times New Roman"),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.3),
+    panel.grid.major = element_line(linetype = "dotted", color = "gray"),
+    panel.grid.minor = element_line(linetype = "dotted", color = "gray")
+  ) +
+  
+  guides(
+    color = guide_colorbar(title.position = "top", title.hjust = 0.4),
+    size = guide_legend(title.position = "top", title.hjust = 0.2,
+                        override.aes = list(alpha = 1), ncol = 2)
+  )
+
+# Print biplot
+print(a)
+
+# Save image
+ggsave("manish_Biplot.png", a, width = 29, height = 20,
+       dpi = 400, units = "cm", bg = "white")
+
+
+# Load libraries
+library(dplyr)
+library(tidyr)
+library(openxlsx)  # for Excel export
+
+df <- manish
+
+# List of traits
+traits <- c("TD","SD","ASI","PH","EH","NCHP","CD","CL","NRPC","NGPR","TGW","GY")
+
+# Calculate mean ± SE for each genotype
+summary_df <- df %>%
+  group_by(GEN) %>%
+  summarise(across(all_of(traits),
+                   list(mean = ~mean(.), SE = ~sd(.)/sqrt(n())),
+                   .names = "{col}_{fn}")) %>%
+  pivot_longer(cols = -GEN, names_to = c("Trait", ".value"), names_sep = "_") %>%
+  mutate(`Mean ± SE` = paste0(round(mean,2), " ± ", round(SE,2))) %>%
+  select(GEN, Trait, `Mean ± SE`) %>%
+  pivot_wider(names_from = Trait, values_from = `Mean ± SE`)
+
+# Save to Excel
+write.xlsx(summary_df, "Genotype_Mean_SE.xlsx", rowNames = FALSE)
+
+
+# ------------------------------------------------------------
+# Load packages
+# ------------------------------------------------------------
+library(ggplot2)
+library(reshape2)
+library(openxlsx)
+library(RColorBrewer)
+library(extrafont)
+
+# ------------------------------------------------------------
+# 1. Read your file (Manish.xlsx)
+# ------------------------------------------------------------
+data_manish <- manish
+
+# ------------------------------------------------------------
+# 2. Keep only numeric columns for PCA
+# ------------------------------------------------------------
+numeric_data <- data_manish[, sapply(data_manish, is.numeric)]
+
+# Check if numeric data exists
+if(ncol(numeric_data) == 0){
+  stop("No numeric columns found in the file. PCA requires numeric data.")
+}
+
+# ------------------------------------------------------------
+# 3. Run PCA
+# ------------------------------------------------------------
+pca_result <- prcomp(numeric_data, scale. = TRUE)
+
+# ------------------------------------------------------------
+# 4. Extract PCA Loadings
+# ------------------------------------------------------------
+pca_loadings <- as.data.frame(pca_result$rotation)
+pca_loadings <- pca_loadings[, 1:5]       # Keep first 5 PCs
+pca_loadings$Trait <- rownames(pca_loadings)
+
+# Convert to long format
+pca_melted <- melt(pca_loadings, id.vars = "Trait")
+
+# ------------------------------------------------------------
+# 5. PCA Loading Heatmap
+# ------------------------------------------------------------
+pca_plot <- ggplot(pca_melted, aes(x = variable, y = Trait, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value, 2)),
+            color = "black", size = 6, family = "Times New Roman") +
+  scale_fill_gradient2(low = "#f07569", mid = "white", high = "#12a3c7",
+                       midpoint = 0) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5,
+                               family = "Times New Roman", color = "black",
+                               size = 20, face = "bold"),
+    axis.text.y = element_text(family = "Times New Roman", color = "black",
+                               size = 20, face = "bold"),
+    legend.position = "none",
+    axis.title = element_blank()
+  ) +
+  scale_x_discrete(position = "top") +
+  coord_fixed()
+
+# Show plot
+print(pca_plot)
+
+# ------------------------------------------------------------
+# 6. Save Output
+# ------------------------------------------------------------
+ggsave("Manish_PCA_Loadings.png",
+       plot = pca_plot,
+       width = 17, height = 25, dpi = 400, units = "cm", bg = "white")
+
+
+
+# Load required libraries
+library(ggplot2)
+library(factoextra)
+library(dplyr)
+
+# Load your data
+data <- manish
+
+# Convert GEN to character
+data$GEN <- as.character(data$GEN)
+
+# Convert tibble to data frame
+FM <- as.data.frame(data)
+
+# Set row names as GEN
+rownames(FM) <- FM$GEN
+
+# Remove the first column (GEN) to keep only numeric data
+df <- FM[, -1]
+
+# Remove any missing values
+df <- na.omit(df)
+
+# Scale the data (standardization)
+df.scaled <- scale(df)
+
+# Compute distance matrix using Euclidean distance
+res.dist <- dist(df.scaled, method = "euclidean")
+
+# Perform hierarchical clustering using Ward's method
+hc <- hclust(res.dist, method = "ward.D2")
+
+# Visualize dendrogram with 5 clusters
+AA <- fviz_dend(hc, 
+                cex = 2.2,                # Label size
+                lwd = 0.8,                # Line width
+                k = 6,                    # Number of clusters
+                rect = TRUE,              # Draw rectangles around clusters
+                rect_fill = TRUE,         # Fill rectangles with colors
+                rect_border = "jco",      # Cluster rectangle border colors
+                k_colors = "jco",         # Cluster colors
+                label_cols = "black",     # Labels in black
+                main = "", 
+                xlab = "", ylab = "") +    
+  theme(
+    text = element_text(family = "Times New Roman"),  # Apply Times New Roman globally
+    axis.title.x = element_text(size = 22, family = "Times New Roman"),
+    axis.text.x = element_text(size = 12, family = "Times New Roman"),
+    axis.text.y = element_text(size = 22, family = "Times New Roman"),
+    plot.title = element_text(size = 16, family = "Times New Roman"),
+    legend.text = element_text(size = 12, family = "Times New Roman"),
+    legend.title = element_text(size = 14, family = "Times New Roman"),
+    panel.background = element_rect(fill = "white"),  # White background
+    panel.grid.major = element_line(color = "grey70", linetype = "dotted"),  # Dotted grid lines
+    panel.grid.minor = element_blank()  # Remove minor grid lines
+  )
+
+# Print the dendrogram
+AA
+
+# Save the dendrogram
+ggsave(filename = "Clus_k6666.png", plot = AA, width = 23, height = 18, dpi = 300, units = "cm")
+
+
