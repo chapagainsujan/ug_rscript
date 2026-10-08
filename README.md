@@ -6,17 +6,6 @@ This repository contains **R scripts I used throughout my undergraduate research
 
 The scripts cover different parts of the research workflow, including data analysis, statistical testing, visualization, and publication-ready figures.
 
-## 🌱 Who is this for?
-
-These scripts may be useful for:
-
-* 🎓 Undergraduate and graduate students in agricultural science
-* 🌾 Students from the **Institute of Agriculture and Animal Science (IAAS), Tribhuvan University**
-* 🌱 Students and researchers from **Agriculture and Forestry University (AFU)**
-* 🧬 Researchers working in plant breeding, genetics, agronomy, crop science, and plant physiology
-* 📊 Anyone learning **R for agricultural research**
-
-
 ## 🚀 How to use
 
 If you are new to R, don't worry if some scripts look complicated at first.
