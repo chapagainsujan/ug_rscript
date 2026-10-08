@@ -2,7 +2,7 @@
 
 Welcome! 
 
-This repository contains **R scripts I used throughout my undergraduate research, projects, and publications**. I am sharing them openly so that they can serve as a practical reference for students and researchers working in **agriculture, plant science, breeding, agronomy, and related fields**.
+This repository contains **R scripts I used throughout my undergraduate research, projects, and publications**. I am sharing them openly so that they can serve as a practical reference for students and researchers working in **agriculture, plant science, plant breeding, agronomy, horticulture and related fields**.
 
 The scripts cover different parts of the research workflow, including data analysis, statistical testing, visualization, and publication-ready figures.
 
@@ -32,9 +32,7 @@ The repository includes scripts used for different research analyses, such as:
 * Trait analysis
 * Data visualization
 * Publication-quality figures
-
-The scripts are based on **real research workflows**, rather than only tutorial examples.
-
+  
 ## 🚀 How to use
 
 If you are new to R, don't worry if some scripts look complicated at first.
@@ -81,9 +79,5 @@ If these scripts help you, feel free to ⭐ the repository and share it with ano
 ### 📚 Research & Learning
 
 This repository is continuously evolving as I learn new statistical methods and research workflows.
-
-More scripts and analyses will be added over time.
-
 **Happy coding, and good luck with your research! 🌾📊**
-
-> *Code is not just a tool for analysis — it is a way to make research reproducible, transparent, and shareable.*
+**Code is not just a tool for analysis — it is a way to make research reproducible, transparent, and shareable**
