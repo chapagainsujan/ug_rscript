@@ -16,23 +16,7 @@ These scripts may be useful for:
 * 🧬 Researchers working in plant breeding, genetics, agronomy, crop science, and plant physiology
 * 📊 Anyone learning **R for agricultural research**
 
-## 📁 What's inside?
 
-The repository includes scripts used for different research analyses, such as:
-
-* Data cleaning and organization
-* Descriptive statistics
-* ANOVA and mean comparison
-* Experimental design analysis
-* Correlation and regression
-* Multivariate analysis
-* Genotype × environment analysis
-* Stability analysis
-* Selection indices
-* Trait analysis
-* Data visualization
-* Publication-quality figures
-  
 ## 🚀 How to use
 
 If you are new to R, don't worry if some scripts look complicated at first.
@@ -80,4 +64,6 @@ If these scripts help you, feel free to ⭐ the repository and share it with ano
 
 This repository is continuously evolving as I learn new statistical methods and research workflows.
 **Happy coding, and good luck with your research! 🌾📊**
+
+
 **Code is not just a tool for analysis — it is a way to make research reproducible, transparent, and shareable**
