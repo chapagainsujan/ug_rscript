@@ -1,0 +1,182 @@
+# ── 1. Load Libraries ─────────────────────────────────────
+library(tidyverse)
+library(showtext)
+library(patchwork)
+
+# ── 2. Set Font ───────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── 3. Read Data ──────────────────────────────────────────
+physio <- Physio  # Assuming your dataset is already loaded in R as 'Physio'
+
+# ── 4. Define Trait Pairs and Full Names ─────────────────
+trait_pairs <- list(
+  "Normalized Difference Vegetation Index (NDVI)"     = c("NDVI1", "NDVI2"),
+  "Canopy Temperature °C (CT)"                        = c("CT1", "CT2"),
+  "Chlorophyll Content (CC)"                          = c("CC1", "CC2"),
+  "SPAD Chlorophyll Content (SPAD)"                   = c("SPAD1", "SPAD2"),
+  "Maximum Quantum Efficiency (Fv/Fm)"                = c("Fv/m1", "Fv/m2"),
+  "Performance Index (Fv/Fo)"                         = c("Fv/o1", "Fv/o2")
+)
+
+labels <- LETTERS[1:6]
+plot_list <- list()
+
+# ── 5. Generate Plots ─────────────────────────────────────
+for (i in seq_along(trait_pairs)) {
+  trait_label <- names(trait_pairs)[i]
+  v_trait <- trait_pairs[[i]][1]
+  r_trait <- trait_pairs[[i]][2]
+  
+  sub <- physio %>%
+    select(GEN, TRT, REP, !!sym(v_trait), !!sym(r_trait)) %>%
+    pivot_longer(cols = c(!!sym(v_trait), !!sym(r_trait)),
+                 names_to = "Stage",
+                 values_to = "Value") %>%
+    mutate(Stage = factor(ifelse(Stage == v_trait, "Vegetative", "Reproductive"),
+                          levels = c("Vegetative", "Reproductive")))
+  
+  summary_dat <- sub %>%
+    group_by(TRT, Stage) %>%
+    summarise(mean = mean(Value, na.rm = TRUE),
+              se = sd(Value, na.rm = TRUE)/sqrt(n()), .groups = "drop")
+  
+  p <- ggplot(summary_dat, aes(x = Stage, y = mean, fill = TRT)) +
+    geom_bar(stat = "identity", position = position_dodge(0.8), width = 0.7) +
+    geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
+                  position = position_dodge(0.8), width = 0.2) +
+    labs(y = trait_label, x = NULL, tag = paste0(labels[i], ".")) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +  # Start y at 0
+    scale_fill_brewer(palette = "Set1") +
+    theme_minimal(base_family = "Times New Roman") +
+    theme(
+      axis.text.x = element_text(size = 40, face = "plain", color = "black"),
+      axis.text.y = element_text(size = 40, face = "plain", color = "black"),
+      axis.title.y = element_text(size = 36, face = "bold", color = "black"),
+      legend.title = element_blank(),
+      legend.text = element_text(size = 32, color = "black"),
+      plot.tag = element_text(face = "bold", size = 48),
+      panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
+      panel.grid = element_blank(),
+      axis.ticks.y = element_line(color = "black", linewidth = 0.5),
+      axis.ticks.length.y = unit(0.15, "cm"),
+      axis.ticks.length.x = unit(0.15, "cm")
+    )
+  
+  plot_list[[i]] <- p
+}
+
+# ── 6. Arrange with Gap Between Rows ──────────────────────
+top_row <- plot_list[[1]] | plot_list[[2]] | plot_list[[3]]
+bottom_row <- plot_list[[4]] | plot_list[[5]] | plot_list[[6]]
+
+final_plot <- (top_row / plot_spacer() / bottom_row) +
+  plot_layout(heights = c(1, 0.1, 1), guides = "collect")
+
+# ── 7. Export Plot ────────────────────────────────────────
+ggsave("physio_trait111s_plot.tiff", final_plot,
+       width = 14, height = 8, dpi = 300, device = "tiff")
+
+
+# ── 1. Load Libraries ─────────────────────────────────────
+library(tidyverse)
+library(showtext)
+library(patchwork)
+library(agricolae)
+library(multcompView)
+
+# ── 2. Set Font ───────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── 3. Read Data ──────────────────────────────────────────
+physio <- Physio  # Your dataset should already be loaded
+
+# ── 4. Define Trait Pairs and Full Names ─────────────────
+trait_pairs <- list(
+  "Normalized Difference Vegetation Index (NDVI)"     = c("NDVI1", "NDVI2"),
+  "Canopy Temperature °C (CT)"                        = c("CT1", "CT2"),
+  "Chlorophyll Content (CC)"                          = c("CC1", "CC2"),
+  "SPAD Chlorophyll Content (SPAD)"                   = c("SPAD1", "SPAD2"),
+  "Maximum Quantum Efficiency (Fv/Fm)"                = c("Fv/m1", "Fv/m2"),
+  "Performance Index (Fv/Fo)"                         = c("Fv/o1", "Fv/o2")
+)
+
+labels <- LETTERS[1:6]
+plot_list <- list()
+
+# ── 5. Generate Plots with Tukey and Letters ─────────────
+for (i in seq_along(trait_pairs)) {
+  trait_label <- names(trait_pairs)[i]
+  v_trait <- trait_pairs[[i]][1]
+  r_trait <- trait_pairs[[i]][2]
+  
+  sub <- physio %>%
+    select(GEN, TRT, REP, !!sym(v_trait), !!sym(r_trait)) %>%
+    pivot_longer(cols = c(!!sym(v_trait), !!sym(r_trait)),
+                 names_to = "Stage",
+                 values_to = "Value") %>%
+    mutate(Stage = factor(ifelse(Stage == v_trait, "Vegetative", "Reproductive"),
+                          levels = c("Vegetative", "Reproductive")))
+  
+  summary_dat <- sub %>%
+    group_by(TRT, Stage) %>%
+    summarise(mean = mean(Value, na.rm = TRUE),
+              se = sd(Value, na.rm = TRUE)/sqrt(n()), .groups = "drop")
+  
+  # ── Perform Tukey Test and Get Letters ─────────────────
+  tukey_letters <- sub %>%
+    group_by(Stage) %>%
+    group_map(~ {
+      aov_model <- aov(Value ~ TRT, data = .x)
+      tukey <- HSD.test(aov_model, "TRT", group = TRUE)
+      data.frame(
+        TRT = rownames(tukey$groups),
+        Stage = .y$Stage,
+        Letter = tukey$groups$groups
+      )
+    }) %>% bind_rows()
+  
+  summary_dat <- summary_dat %>%
+    left_join(tukey_letters, by = c("TRT", "Stage"))
+  
+  # ── Create Plot ─────────────────────────────────────────
+  p <- ggplot(summary_dat, aes(x = Stage, y = mean, fill = TRT)) +
+    geom_bar(stat = "identity", position = position_dodge(0.8), width = 0.7) +
+    geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
+                  position = position_dodge(0.8), width = 0.2) +
+    geom_text(aes(label = Letter),
+              position = position_dodge(0.8), vjust = -0.7,
+              size = 16, family = "Times New Roman") +  # Increased letter size here
+    labs(y = trait_label, x = NULL, tag = paste0(labels[i], ".")) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+    scale_fill_manual(values = c("#1f557f", "#f57c28")) +
+    theme_minimal(base_family = "Times New Roman") +
+    theme(
+      axis.text.x = element_text(size = 44, face = "plain", color = "black"),
+      axis.text.y = element_text(size = 44, face = "plain", color = "black"),
+      axis.title.y = element_text(size = 36, face = "bold", color = "black"),
+      legend.title = element_blank(),
+      legend.text = element_text(size = 32, color = "black"),
+      plot.tag = element_text(face = "bold", size = 48),
+      panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
+      panel.grid = element_blank(),
+      axis.ticks.y = element_line(color = "black", linewidth = 0.5),
+      axis.ticks.length.y = unit(0.15, "cm"),
+      axis.ticks.length.x = unit(0.15, "cm")
+    )
+  
+  plot_list[[i]] <- p
+}
+
+# ── 6. Arrange Plots in Grid with Spacer ─────────────────
+top_row <- plot_list[[1]] | plot_list[[2]] | plot_list[[3]]
+bottom_row <- plot_list[[4]] | plot_list[[5]] | plot_list[[6]]
+
+final_plot <- (top_row / plot_spacer() / bottom_row) +
+  plot_layout(heights = c(1, 0.1, 1), guides = "collect")
+
+# ── 7. Export Plot as TIFF ───────────────────────────────
+ggsave("physio_tra123its_plot.tiff", final_plot,
+       width = 13, height = 8, dpi = 300, device = "tiff")
