@@ -1,0 +1,90 @@
+# ── 1. Load Libraries ─────────────────────────────────────────────
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(showtext)
+
+# ── 2. Font Setup ────────────────────────────────────────────────
+font_add("Times New Roman", regular = "C:/Windows/Fonts/times.ttf")
+showtext_auto()
+
+# ── 3. Dataset ───────────────────────────────────────────────────
+SD <- SAAAAA  # (Sandesh Data Final in Sandesh-Samir) Replace with your actual data
+
+# Rename TRT levels: Irrigated → IR, Drought → D
+SD$TRT <- recode(SD$TRT, "Irrigated" = "IR", "Drought" = "D")
+
+# ── 4. Plot Function ─────────────────────────────────────────────
+create_trait_plot <- function(data, trait, y_label) {
+  mean_by_trt <- aggregate(data[[trait]], by = list(data$TRT), FUN = mean, na.rm = TRUE)
+  colnames(mean_by_trt) <- c("TRT", trait)
+  
+  genotype_means <- data %>%
+    group_by(TRT, GEN) %>%
+    summarise(mean_trait = mean(.data[[trait]], na.rm = TRUE), .groups = "drop")
+  
+  ggplot(data, aes(x = TRT, y = .data[[trait]], color = TRT)) +
+    geom_boxplot(fill = "white", outlier.shape = NA, size = 1, aes(group = TRT)) +
+    geom_point(data = genotype_means,
+               aes(x = TRT, y = mean_trait, color = TRT),
+               shape = 16, size = 3.5, inherit.aes = FALSE) +
+    geom_point(data = mean_by_trt,
+               aes(x = TRT, y = .data[[trait]]),
+               shape = 18, color = "black", size = 4.5, inherit.aes = FALSE) +
+    scale_color_manual(values = c("D" = "#E69F00", "IR" = "#56B4E9"),
+                       name = "Treatment",
+                       labels = c("D" = "Drought", "IR" = "Irrigated")) +
+    labs(x = "", y = y_label) +
+    theme_gray(base_family = "Times New Roman") +  # base gray theme applied
+    theme(
+      axis.title.x  = element_text(size = 88),
+      axis.title.y  = element_text(size = 88),
+      axis.text.x   = element_text(size = 86),
+      axis.text.y   = element_text(size = 86),
+      plot.title    = element_text(size = 80, face = "bold", hjust = 0.5),
+      legend.title  = element_text(size = 0),
+      legend.text   = element_text(size = 86),
+      legend.position = "right",
+      plot.tag      = element_text(size = 100, face = "bold"),
+      
+      # Remove this line so the gray background is visible:
+      # panel.background = element_rect(fill = "white", color = NA),
+      
+      panel.grid.major = element_line(color = "gray80", size = 0.4),
+      panel.grid.minor = element_line(color = "gray90", size = 0.2),
+      panel.border     = element_blank(),
+      axis.line        = element_line(color = "black", size = 0.5)
+    )
+}
+
+# ── 5. Create Individual Trait Plots ─────────────────────────────
+PH_plot   <- create_trait_plot(SD, "PH",   "PH (cm)")
+FLA_plot  <- create_trait_plot(SD, "FLA",  "FLA (cm²)")
+PL_plot   <- create_trait_plot(SD, "PL",   "PL (cm)")
+DTB_plot  <- create_trait_plot(SD, "DTB",  "DTB (days)")
+DTH_plot  <- create_trait_plot(SD, "DTH",  "DTH (days)")
+DTA_plot  <- create_trait_plot(SD, "DTA",  "DTA (days)")
+DTM_plot  <- create_trait_plot(SD, "DTM",  "DTM (days)")
+SL_plot   <- create_trait_plot(SD, "SL",   "SL (cm)")
+NS_plot   <- create_trait_plot(SD, "NS",   "NS (n)")
+NGPS_plot <- create_trait_plot(SD, "NGPS", "NGPS (n)")
+TSW_plot  <- create_trait_plot(SD, "TSW",  "TSW (g)")
+GY_plot   <- create_trait_plot(SD, "GY",   "GY (t/ha)")
+
+# ── 6. Combine Plots and Add Tags ───────────────────────────────
+Final_plot <- PH_plot + FLA_plot + PL_plot + DTB_plot + 
+  DTH_plot + DTA_plot + DTM_plot + SL_plot + 
+  NS_plot + NGPS_plot + TSW_plot + GY_plot +
+  plot_layout(ncol = 4, guides = "collect") +
+  plot_annotation(
+    tag_levels = 'a',
+    tag_prefix = '',
+    tag_suffix = '.'
+  )
+
+# ── 7. Display & Save Plot ──────────────────────────────────────
+print(Final_plot)
+
+ggsave("Combined_Boxplot_WHEAT.png",
+       plot   = Final_plot,
+       width  = 20, height = 16, dpi = 400)
